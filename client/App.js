@@ -176,6 +176,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     alignItems: 'center',
     justifyContent: 'center',
+    marginHorizontal: 15
   },
   title: { 
     fontSize: 28, 
