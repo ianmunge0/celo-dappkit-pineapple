@@ -52,7 +52,7 @@ export default class App extends React.Component {
     const requestId = 'login'
     
     // A string that will be displayed to the user, indicating the DApp requesting access/signature
-    const dappName = 'Hello Celo'
+    const dappName = 'Smart Loan'
     
     // The deeplink that the Celo Wallet will use to redirect the user back to the DApp with the appropriate payload.
     const callback = Linking.makeUrl('/my/path')
@@ -97,7 +97,7 @@ export default class App extends React.Component {
 
   write = async () => {
     const requestId = 'update_name'
-    const dappName = 'Hello Celo'
+    const dappName = 'Smart Loan'
     const callback = Linking.makeUrl('/my/path')
 
     // Create a transaction object to update the contract with the 'textInput'
