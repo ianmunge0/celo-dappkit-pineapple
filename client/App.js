@@ -24,7 +24,8 @@ export default class App extends React.Component {
     helloWorldContract: {},
     contractName: '',
     loanAmount: '',
-    duration: ''
+    duration: '',
+    loggedin: false
   }
 
   // This function is called when the page successfully renders
@@ -83,7 +84,8 @@ export default class App extends React.Component {
     this.setState({ cUSDBalance, 
                     isLoadingBalance: false,
                     address: dappkitResponse.address, 
-                    phoneNumber: dappkitResponse.phoneNumber })
+                    phoneNumber: dappkitResponse.phoneNumber,
+                    loggedin: true })
   }
 
   read = async () => {
@@ -137,7 +139,15 @@ export default class App extends React.Component {
         <Text style={styles.title}>Smart Loan</Text>
         <Image resizeMode='contain' source={require("./assets/celologocolored.png")}></Image>
         
-        <Text></Text>
+        {
+          this.state.loggedin ? 
+          <Text></Text> : 
+          <View>
+            <TouchableOpacity onPress={()=> this.login()} style={styles.loginbutton}>
+              <Text style={styles.txtLogin}>LOGIN</Text>
+            </TouchableOpacity>
+          </View>
+        }
         <Text style={styles.txtAccountInfo}>Account Info:</Text>
         <Text>Borrower's Address:</Text>
         <Text>{this.state.address}</Text>
@@ -158,12 +168,18 @@ export default class App extends React.Component {
           value={this.state.duration}
         />
 
-        <Text></Text>
-        <View>
-          <TouchableOpacity onPress={()=> this.login()} style={styles.submitbutton}>
-            <Text style={styles.txtLogin}>SUBMIT</Text>
-          </TouchableOpacity>
-        </View>
+        {
+          this.state.loggedin ? 
+          <View>
+            <Text></Text>
+            <TouchableOpacity onPress={() => console.log("submit function_")} style={styles.submitbutton}>
+              <Text style={styles.txtSubmit}>SUBMIT</Text>
+            </TouchableOpacity>
+          </View> : 
+          <Text></Text>
+        }
+
+        
 
       </View>
     );
@@ -186,10 +202,20 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 13
   },
+  loginbutton: {
+    backgroundColor: "#fcc16b",
+    borderRadius: 5,
+    paddingHorizontal: 60,
+    paddingVertical: 10
+  },
   txtAccountInfo: {
     marginVertical: 8, 
     fontSize: 17, 
     fontWeight: 'bold'
+  },
+  txtSubmit: {
+    color: 'white',
+    fontSize: 13
   },
   submitbutton: {
     backgroundColor: "#55bf7d",
