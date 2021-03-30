@@ -1,6 +1,4 @@
-# Celo Truffle Box
-
-This [Truffle Box](https://www.trufflesuite.com/boxes) will help you get started building a mobile dapp using Celo and React Native in Javascript. We will build a simple React Native application that we can use to read and update a contract on the [Alfajores test network](https://docs.celo.org/getting-started/alfajores-testnet).
+# Smart Loan
 
 ## Requirements
 
@@ -11,10 +9,6 @@ This [Truffle Box](https://www.trufflesuite.com/boxes) will help you get started
 
 ## Get the boilerplate
 
-```bash
-truffle unbox critesjosh/celo-dappkit
-``` 
-
 The project smart contracts and configuration are in the root directory. The React Native front end is in the `/client` directory. Once you download the box, run 
 
 ```bash
@@ -23,7 +17,7 @@ cd client  # move into the client directory
 yarn       # install front end dependencies
 ```
 
-This Truffle box uses React Native and [Expo](https://expo.io/) for developing a mobile first Celo blockchain experience. 
+Smart Loan uses React Native and [Expo](https://expo.io/) for developing a mobile first Celo blockchain experience. 
 
 ## Mobile Dependencies
 
@@ -142,11 +136,9 @@ You can build a the latest version of the Celo Wallet and find instructions on r
 
 Once you have a device with the Celo wallet installed, you can start working on your application. 
 
-For the purposes of introduction, we have added some code to you get you started located in App.js in the `client` directory.
-
 ### Application development with Expo
 
-In this project, the React Native application lives in the `client` directory. `cd` into the client directory and run `$ yarn` to install the dependencies. 
+In this project, the React Native application lives in the `client` directory.
 
 [Expo](https://expo.io/) is a tool that makes developing React Native applications much easier. We will be using Expo for easy setup.
 
@@ -169,15 +161,3 @@ Make sure the Celo Wallet app is open on your device when you are using your dap
 ### Using an emulator
 
 You can find more information about running and Android emulator [here.](https://developer.android.com/studio/run/emulator-commandline)
-
-## Celo Dapp Examples
-
-Check out the [Celo DApp Gallery](https://docs.celo.org/developer-guide/celo-dapp-gallery) for more examples.
-
-## Wrapping up
-
-You should now have the necessary skills to get started with developing mobile applications on Celo.
-
-This is not a comprehensive tutorial for Celo's features and capabilities. 
-
-Please [see our documentation](https://docs.celo.org/) for more info and feel free to [connect with us on Discord](https://discord.gg/745Qntv) if you need any help!
