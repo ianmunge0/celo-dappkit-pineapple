@@ -25,7 +25,9 @@ export default class App extends React.Component {
     contractName: '',
     loanAmount: '',
     duration: '',
-    loggedin: false
+    loggedin: false,
+    ifTxtAmntFocused: false,
+    ifTxtDaysFocused: false
   }
 
   // This function is called when the page successfully renders
@@ -133,6 +135,14 @@ export default class App extends React.Component {
     this.setState({textInput: text})
   }
 
+  amtFocusChanged = async (changeParam) => {
+    this.setState({ifTxtAmntFocused: changeParam})
+  }
+
+  daysFocusChanged = async (changeParam) => {
+    this.setState({ifTxtDaysFocused: changeParam})
+  }
+
   render(){
     return (
       <View style={styles.container}>
@@ -155,14 +165,18 @@ export default class App extends React.Component {
         <Text></Text>
 
         <TextInput
-          style={{  borderColor: 'gray', borderWidth: 1, backgroundColor: 'white', paddingHorizontal: 60, borderRadius: 5 }}
+          style={this.state.ifTxtAmntFocused ? styles.txtInputFocus : styles.txtInputBlur}
+          onFocus={() => this.amtFocusChanged(true)}
+          onBlur={() => this.amtFocusChanged(false)}
           placeholder="amount (CELO)"
           onChangeText={text => this.onChangeText(text)}
           value={this.state.loanAmount}
         />
         <Text></Text>        
         <TextInput
-          style={{  borderColor: 'gray', borderWidth: 1, backgroundColor: 'white', paddingHorizontal: 60, borderRadius: 5 }}
+          style={this.state.ifTxtDaysFocused ? styles.txtInputFocus : styles.txtInputBlur}
+          onFocus={() => this.daysFocusChanged(true)}
+          onBlur={() => this.daysFocusChanged(false)}
           placeholder="duration (days)"
           onChangeText={text => this.onChangeText(text)}
           value={this.state.duration}
@@ -222,5 +236,19 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 60,
     paddingVertical: 10
+  },
+  txtInputFocus: {
+    borderColor: '#55bf7d',
+    borderWidth: 2,
+    backgroundColor: 'white',
+    paddingHorizontal: 60, 
+    borderRadius: 5
+  },
+  txtInputBlur: {
+    borderColor: 'gray',
+    borderWidth: 1,
+    backgroundColor: 'white',
+    paddingHorizontal: 60,
+    borderRadius: 5
   }
 });
