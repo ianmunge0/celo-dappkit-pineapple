@@ -131,8 +131,12 @@ export default class App extends React.Component {
     console.log(`Hello World contract update transaction receipt: `, result)  
   }
 
-  onChangeText = async (text) => {
-    this.setState({textInput: text})
+  onChangeAmount = async (text) => {
+    this.setState({loanAmount: text})
+  }
+
+  onChangeDuration = async (text) => {
+    this.setState({duration: text})
   }
 
   amtFocusChanged = async (changeParam) => {
@@ -154,7 +158,7 @@ export default class App extends React.Component {
           <Text></Text> : 
           <View>
             <TouchableOpacity onPress={()=> this.login()} style={styles.loginbutton}>
-              <Text style={styles.txtLogin}>LOGIN</Text>
+              <Text style={styles.txtLogin}>CONNECT VALORA</Text>
             </TouchableOpacity>
           </View>
         }
@@ -168,8 +172,9 @@ export default class App extends React.Component {
           style={this.state.ifTxtAmntFocused ? styles.txtInputFocus : styles.txtInputBlur}
           onFocus={() => this.amtFocusChanged(true)}
           onBlur={() => this.amtFocusChanged(false)}
-          placeholder="amount (CELO)"
-          onChangeText={text => this.onChangeText(text)}
+          placeholder="amount (cUSD)"
+          onChangeText={text => this.onChangeAmount(text)}
+          keyboardType='numeric'
           value={this.state.loanAmount}
         />
         <Text></Text>        
@@ -178,7 +183,8 @@ export default class App extends React.Component {
           onFocus={() => this.daysFocusChanged(true)}
           onBlur={() => this.daysFocusChanged(false)}
           placeholder="duration (days)"
-          onChangeText={text => this.onChangeText(text)}
+          onChangeText={text => this.onChangeDuration(text)}
+          keyboardType='numeric'
           value={this.state.duration}
         />
 
