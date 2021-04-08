@@ -24,7 +24,8 @@ export default class App extends React.Component {
     helloWorldContract: {},
     contractName: '',
     loanAmount: '',
-    duration: ''
+    duration: '',
+    loggedin: false
   }
 
   // This function is called when the page successfully renders
@@ -52,7 +53,7 @@ export default class App extends React.Component {
     const requestId = 'login'
     
     // A string that will be displayed to the user, indicating the DApp requesting access/signature
-    const dappName = 'Hello Celo'
+    const dappName = 'Smart Loan'
     
     // The deeplink that the Celo Wallet will use to redirect the user back to the DApp with the appropriate payload.
     const callback = Linking.makeUrl('/my/path')
@@ -83,7 +84,8 @@ export default class App extends React.Component {
     this.setState({ cUSDBalance, 
                     isLoadingBalance: false,
                     address: dappkitResponse.address, 
-                    phoneNumber: dappkitResponse.phoneNumber })
+                    phoneNumber: dappkitResponse.phoneNumber,
+                    loggedin: true })
   }
 
   read = async () => {
@@ -97,7 +99,7 @@ export default class App extends React.Component {
 
   write = async () => {
     const requestId = 'update_name'
-    const dappName = 'Hello Celo'
+    const dappName = 'Smart Loan'
     const callback = Linking.makeUrl('/my/path')
 
     // Create a transaction object to update the contract with the 'textInput'
@@ -137,7 +139,15 @@ export default class App extends React.Component {
         <Text style={styles.title}>Smart Loan</Text>
         <Image resizeMode='contain' source={require("./assets/celologocolored.png")}></Image>
         
-        <Text></Text>
+        {
+          this.state.loggedin ? 
+          <Text></Text> : 
+          <View>
+            <TouchableOpacity onPress={()=> this.login()} style={styles.loginbutton}>
+              <Text style={styles.txtLogin}>LOGIN</Text>
+            </TouchableOpacity>
+          </View>
+        }
         <Text style={styles.txtAccountInfo}>Account Info:</Text>
         <Text>Borrower's Address:</Text>
         <Text>{this.state.address}</Text>
@@ -158,12 +168,18 @@ export default class App extends React.Component {
           value={this.state.duration}
         />
 
-        <Text></Text>
-        <View>
-          <TouchableOpacity onPress={()=> this.login()} style={styles.submitbutton}>
-            <Text style={styles.txtLogin}>SUBMIT</Text>
-          </TouchableOpacity>
-        </View>
+        {
+          this.state.loggedin ? 
+          <View>
+            <Text></Text>
+            <TouchableOpacity onPress={() => console.log("submit function_")} style={styles.submitbutton}>
+              <Text style={styles.txtSubmit}>SUBMIT</Text>
+            </TouchableOpacity>
+          </View> : 
+          <Text></Text>
+        }
+
+        
 
       </View>
     );
@@ -176,6 +192,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     alignItems: 'center',
     justifyContent: 'center',
+    marginHorizontal: 15
   },
   title: { 
     fontSize: 28, 
@@ -185,10 +202,20 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 13
   },
+  loginbutton: {
+    backgroundColor: "#fcc16b",
+    borderRadius: 5,
+    paddingHorizontal: 60,
+    paddingVertical: 10
+  },
   txtAccountInfo: {
     marginVertical: 8, 
     fontSize: 17, 
     fontWeight: 'bold'
+  },
+  txtSubmit: {
+    color: 'white',
+    fontSize: 13
   },
   submitbutton: {
     backgroundColor: "#55bf7d",
