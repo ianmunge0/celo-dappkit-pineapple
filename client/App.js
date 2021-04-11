@@ -11,7 +11,7 @@ import {
 } from '@celo/dappkit'
 import { toTxResult } from "@celo/connect"
 import * as Linking from 'expo-linking'
-import PineappleContract from './contracts/HelloWorld.json'
+import PINE from './contracts/artifacts/PINE.json'
 
 const contractAddress = '0x79040D6785f6806B7bcB14EBeca716E989567c43'
 
@@ -23,7 +23,7 @@ export default class App extends React.Component {
   // Set the defaults for the state
   state = {
     address: 'Not logged in',
-    PineappleContract: {},
+    PINE: {},
     contractName: '',
     loanAmount: '',
     duration: '',
@@ -38,7 +38,7 @@ export default class App extends React.Component {
     const networkId = await web3.eth.net.getId();
     
     // Get the deployed HelloWorld contract info for the appropriate network ID
-    const deployedNetwork = PineappleContract.networks[networkId];
+    const deployedNetwork = PINE.networks[networkId];
 
     // Create a new contract instance with the HelloWorld contract info
     const instance = new web3.eth.Contract(
@@ -47,7 +47,7 @@ export default class App extends React.Component {
     );
 
     // Save the contract instance
-    this.setState({ PineappleContract: instance })
+    this.setState({ PINE: instance })
   }
 
   login = async () => {
@@ -94,7 +94,7 @@ export default class App extends React.Component {
   read = async () => {
     
     // Read the name stored in the HelloWorld contract
-    let name = await this.state.PineappleContract.methods.getName().call()
+    let name = await this.state.PINE.methods.getName().call()
     
     // Update state
     this.setState({ contractName: name })
@@ -106,7 +106,7 @@ export default class App extends React.Component {
     const callback = Linking.makeUrl('/my/path')
 
     // Create a transaction object to update the contract with the 'textInput'
-    const txObject = await this.state.PineappleContract.methods.setName(this.state.loanAmount)
+    const txObject = await this.state.PINE.methods.setName(this.state.loanAmount)
 
     // Send a request to the Celo wallet to send an update transaction to the HelloWorld contract
     requestTxSig(
@@ -114,7 +114,7 @@ export default class App extends React.Component {
       [
         {
           from: this.state.address,
-          to: this.state.PineappleContract.options.address,
+          to: this.state.PINE.options.address,
           tx: txObject,
           feeCurrency: FeeCurrency.cUSD
         }
@@ -136,13 +136,23 @@ export default class App extends React.Component {
     this.setState({textInput: text})
   }
 
-  generateSmartContract = () => {
-    console.log("Submit button clicked...")
-    console.log(this.state.address)
-    console.log("Mint the token based on ammount borrowed.")
-    console.log("Transfered the token to Borrower's account.")
-    console.log("Display BalanceOf token.")
+  processSmartContract = () => {
 
+    if(this.state.borrower){
+      <Text>Borrower's Display</Text>
+      console.log("Submit button clicked...")
+      console.log(this.state.address)
+      console.log("Mint the token based on ammount borrowed.")
+      console.log("Transfered the token to Borrower's account.")
+      console.log("Display BalanceOf token.")
+    } else {
+      <Text>Lender's Display</Text>
+      console.log("Submit button clicked...")
+      console.log(this.state.address)
+      console.log("Call the buyToken function in contract.")
+      console.log("Transfered celo to Borrower's account.")
+      console.log("Display BalanceOf token received by lender.")
+    }
   }
 
   loginBorrow = () => {
@@ -159,10 +169,14 @@ export default class App extends React.Component {
   render(){
     return (
       <View style={styles.container}>
+        
         <Text style={styles.title}>Smart Loan</Text>
         <Image resizeMode='contain' source={require("./assets/celologocolored.png")}></Image>
+        
         <Text style={styles.txtAccountInfo}>Account Info:</Text>
+        
         <Text>User's Address:</Text>
+
         <Text>{this.state.address}</Text>
 
         {
@@ -220,7 +234,7 @@ export default class App extends React.Component {
           <View>
             <Text></Text>
             <TouchableOpacity 
-            onPress={() => this.generateSmartContract()} 
+            onPress={() => this.processSmartContract()} 
             style={styles.submitbutton}>
               <Text style={styles.txtSubmit}>SUBMIT</Text>
             </TouchableOpacity>
