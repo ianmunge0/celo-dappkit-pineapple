@@ -20,14 +20,16 @@ export default class App extends React.Component {
 
   // Set the defaults for the state
   state = {
-    address: 'Not logged in',
+    address: '(Connect to retrieve address)',
     helloWorldContract: {},
     contractName: '',
     loanAmount: '',
     duration: '',
+    referenceno: '',
     loggedin: false,
     ifTxtAmntFocused: false,
-    ifTxtDaysFocused: false
+    ifTxtDaysFocused: false,
+    ifTxtRefnoFocused: false,
   }
 
   // This function is called when the page successfully renders
@@ -139,12 +141,20 @@ export default class App extends React.Component {
     this.setState({duration: text})
   }
 
+  onChangeRefno = async (text) => {
+    this.setState({referenceno: text})
+  }
+
   amtFocusChanged = async (changeParam) => {
     this.setState({ifTxtAmntFocused: changeParam})
   }
 
   daysFocusChanged = async (changeParam) => {
     this.setState({ifTxtDaysFocused: changeParam})
+  }
+
+  refnoFocusChanged = async (changeParam) => {
+    this.setState({ifTxtRefnoFocused: changeParam})
   }
 
   render(){
@@ -186,6 +196,15 @@ export default class App extends React.Component {
           onChangeText={text => this.onChangeDuration(text)}
           keyboardType='numeric'
           value={this.state.duration}
+        />
+        <Text></Text>        
+        <TextInput
+          style={this.state.ifTxtRefnoFocused ? styles.txtInputFocus : styles.txtInputBlur}
+          onFocus={() => this.refnoFocusChanged(true)}
+          onBlur={() => this.refnoFocusChanged(false)}
+          placeholder="reference no."
+          onChangeText={text => this.onChangeRefno(text)}
+          value={this.state.referenceno}
         />
 
         {
