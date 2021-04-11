@@ -11,7 +11,9 @@ import {
 } from '@celo/dappkit'
 import { toTxResult } from "@celo/connect"
 import * as Linking from 'expo-linking'
-import HelloWorldContract from './contracts/HelloWorld.json'
+import PineappleContract from './contracts/HelloWorld.json'
+
+const contractAddress = '0x79040D6785f6806B7bcB14EBeca716E989567c43'
 
 
 YellowBox.ignoreWarnings(['Warning: The provided value \'moz', 'Warning: The provided value \'ms-stream'])
@@ -21,10 +23,11 @@ export default class App extends React.Component {
   // Set the defaults for the state
   state = {
     address: 'Not logged in',
-    helloWorldContract: {},
+    PineappleContract: {},
     contractName: '',
     loanAmount: '',
     duration: '',
+    borrower: false,
     loggedin: false
   }
 
@@ -35,16 +38,16 @@ export default class App extends React.Component {
     const networkId = await web3.eth.net.getId();
     
     // Get the deployed HelloWorld contract info for the appropriate network ID
-    const deployedNetwork = HelloWorldContract.networks[networkId];
+    const deployedNetwork = PineappleContract.networks[networkId];
 
     // Create a new contract instance with the HelloWorld contract info
     const instance = new web3.eth.Contract(
-      HelloWorldContract.abi,
-      deployedNetwork && deployedNetwork.address
+      PINE.abi,
+      contractAddress
     );
 
     // Save the contract instance
-    this.setState({ helloWorldContract: instance })
+    this.setState({ PineappleContract: instance })
   }
 
   login = async () => {
@@ -91,7 +94,7 @@ export default class App extends React.Component {
   read = async () => {
     
     // Read the name stored in the HelloWorld contract
-    let name = await this.state.helloWorldContract.methods.getName().call()
+    let name = await this.state.PineappleContract.methods.getName().call()
     
     // Update state
     this.setState({ contractName: name })
@@ -103,7 +106,7 @@ export default class App extends React.Component {
     const callback = Linking.makeUrl('/my/path')
 
     // Create a transaction object to update the contract with the 'textInput'
-    const txObject = await this.state.helloWorldContract.methods.setName(this.state.loanAmount)
+    const txObject = await this.state.PineappleContract.methods.setName(this.state.loanAmount)
 
     // Send a request to the Celo wallet to send an update transaction to the HelloWorld contract
     requestTxSig(
@@ -111,7 +114,7 @@ export default class App extends React.Component {
       [
         {
           from: this.state.address,
-          to: this.state.helloWorldContract.options.address,
+          to: this.state.PineappleContract.options.address,
           tx: txObject,
           feeCurrency: FeeCurrency.cUSD
         }
@@ -133,54 +136,97 @@ export default class App extends React.Component {
     this.setState({textInput: text})
   }
 
+  generateSmartContract = () => {
+    console.log("Submit button clicked...")
+    console.log(this.state.address)
+    console.log("Mint the token based on ammount borrowed.")
+    console.log("Transfered the token to Borrower's account.")
+    console.log("Display BalanceOf token.")
+
+  }
+
+  loginBorrow = () => {
+    this.login()
+    console.log("Login as borrower...")
+    this.setState({ borrower: true })
+  }
+
+  loginInvest = () => {
+    this.login()
+    console.log("Login as investor...")
+  }
+
   render(){
     return (
       <View style={styles.container}>
         <Text style={styles.title}>Smart Loan</Text>
         <Image resizeMode='contain' source={require("./assets/celologocolored.png")}></Image>
-        
+        <Text style={styles.txtAccountInfo}>Account Info:</Text>
+        <Text>User's Address:</Text>
+        <Text>{this.state.address}</Text>
+
         {
           this.state.loggedin ? 
           <Text></Text> : 
           <View>
-            <TouchableOpacity onPress={()=> this.login()} style={styles.loginbutton}>
-              <Text style={styles.txtLogin}>LOGIN</Text>
+            <TouchableOpacity onPress={()=> this.loginBorrow()} style={styles.loginbutton}>
+              <Text style={styles.txtLogin}>BORROW</Text>
+            </TouchableOpacity>
+            <Text></Text> 
+            <TouchableOpacity onPress={()=> this.loginInvest()} style={styles.loginbutton}>
+              <Text style={styles.txtLogin}>INVEST</Text>
             </TouchableOpacity>
           </View>
         }
-        <Text style={styles.txtAccountInfo}>Account Info:</Text>
-        <Text>Borrower's Address:</Text>
-        <Text>{this.state.address}</Text>
-
-        <Text></Text>
-
-        <TextInput
-          style={{  borderColor: 'gray', borderWidth: 1, backgroundColor: 'white', paddingHorizontal: 60, borderRadius: 5 }}
-          placeholder="amount (CELO)"
-          onChangeText={text => this.onChangeText(text)}
-          value={this.state.loanAmount}
-        />
-        <Text></Text>        
-        <TextInput
-          style={{  borderColor: 'gray', borderWidth: 1, backgroundColor: 'white', paddingHorizontal: 60, borderRadius: 5 }}
-          placeholder="duration (days)"
-          onChangeText={text => this.onChangeText(text)}
-          value={this.state.duration}
-        />
 
         {
           this.state.loggedin ? 
           <View>
             <Text></Text>
-            <TouchableOpacity onPress={() => console.log("submit function_")} style={styles.submitbutton}>
+            <TextInput
+              style={{  borderColor: 'gray', borderWidth: 1, backgroundColor: 'white', paddingHorizontal: 60, borderRadius: 5 }}
+              placeholder="amount (CELO)"
+              onChangeText={(text) => 
+                this.setState({text})
+              }
+              /*value={this.state.loanAmount}*/
+            />
+            <Text></Text>        
+            
+            {
+              this.state.borrower ? 
+                <TextInput
+                  style={{  borderColor: 'gray', borderWidth: 1, backgroundColor: 'white', paddingHorizontal: 60, borderRadius: 5 }}
+                  placeholder="duration (days)"
+                  onChangeText={(text) => this.onChangeText(text)}
+                  /*value={this.state.duration}*/
+                />
+                : 
+                <TextInput
+                  style={{  borderColor: 'gray', borderWidth: 1, backgroundColor: 'white', paddingHorizontal: 60, borderRadius: 5 }}
+                  placeholder="Borrower's Contract Adds"
+                  onChangeText={(text) => this.onChangeText(text)}
+                  /*value={this.state.duration}*/
+                />
+            }
+
+          </View>
+          : <Text></Text>
+        }
+
+
+        {
+          this.state.loggedin ? 
+          <View>
+            <Text></Text>
+            <TouchableOpacity 
+            onPress={() => this.generateSmartContract()} 
+            style={styles.submitbutton}>
               <Text style={styles.txtSubmit}>SUBMIT</Text>
             </TouchableOpacity>
           </View> : 
           <Text></Text>
         }
-
-        
-
       </View>
     );
   }
