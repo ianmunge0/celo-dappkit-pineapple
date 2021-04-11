@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useState} from 'react'
 import './global'
 import { web3, kit } from './root'
 import { Image, StyleSheet, Text, TextInput, Button, View, YellowBox, TouchableOpacity } from 'react-native'
@@ -13,23 +13,39 @@ import { toTxResult } from "@celo/connect"
 import * as Linking from 'expo-linking'
 import PINE from './contracts/artifacts/PINE.json'
 
-const contractAddress = '0x79040D6785f6806B7bcB14EBeca716E989567c43'
+const contractAddress = '0x79040D6785f6806B7bcB14EBeca716E989567c43';
+
+
 
 
 YellowBox.ignoreWarnings(['Warning: The provided value \'moz', 'Warning: The provided value \'ms-stream'])
 
 export default class App extends React.Component {
+  
 
   // Set the defaults for the state
   state = {
     address: 'Not logged in',
     PINE: {},
     contractName: '',
-    loanAmount: '',
+    celoAmount: '',
     duration: '',
     borrower: false,
     loggedin: false
   }
+
+
+
+  handle_contractName = (text) => {
+    this.setState({ contractName: text })
+  }
+  handle_celoAmount = (text) => {
+    this.setState({ celoAmount: text })
+  }
+  handle_duration = (text) => {
+    this.setState({ duration: text })
+  }
+
 
   // This function is called when the page successfully renders
   componentDidMount = async () => {
@@ -145,6 +161,7 @@ export default class App extends React.Component {
       console.log("Mint the token based on ammount borrowed.")
       console.log("Transfered the token to Borrower's account.")
       console.log("Display BalanceOf token.")
+      console.log(text)
     } else {
       <Text>Lender's Display</Text>
       console.log("Submit button clicked...")
@@ -152,6 +169,7 @@ export default class App extends React.Component {
       console.log("Call the buyToken function in contract.")
       console.log("Transfered celo to Borrower's account.")
       console.log("Display BalanceOf token received by lender.")
+      console.log(text)
     }
   }
 
@@ -165,8 +183,11 @@ export default class App extends React.Component {
     this.login()
     console.log("Login as investor...")
   }
-
+  
   render(){
+
+    
+
     return (
       <View style={styles.container}>
         
@@ -200,10 +221,8 @@ export default class App extends React.Component {
             <TextInput
               style={{  borderColor: 'gray', borderWidth: 1, backgroundColor: 'white', paddingHorizontal: 60, borderRadius: 5 }}
               placeholder="amount (CELO)"
-              onChangeText={(text) => 
-                this.setState({text})
-              }
-              /*value={this.state.loanAmount}*/
+              onChangeText={this.handle_celoAmount}
+              keyboardType={'numeric'}
             />
             <Text></Text>        
             
@@ -212,15 +231,14 @@ export default class App extends React.Component {
                 <TextInput
                   style={{  borderColor: 'gray', borderWidth: 1, backgroundColor: 'white', paddingHorizontal: 60, borderRadius: 5 }}
                   placeholder="duration (days)"
-                  onChangeText={(text) => this.onChangeText(text)}
-                  /*value={this.state.duration}*/
+                  onChangeText={this.handle_duration}
+                  keyboardType={'numeric'}
                 />
                 : 
                 <TextInput
                   style={{  borderColor: 'gray', borderWidth: 1, backgroundColor: 'white', paddingHorizontal: 60, borderRadius: 5 }}
                   placeholder="Borrower's Contract Adds"
-                  onChangeText={(text) => this.onChangeText(text)}
-                  /*value={this.state.duration}*/
+                  onChangeText={this.handle_contractName}
                 />
             }
 
