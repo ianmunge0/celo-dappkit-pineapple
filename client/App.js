@@ -14,7 +14,7 @@ import * as Linking from 'expo-linking'
 import PINE from './contracts/artifacts/PINE.json'
 
 
-const contractAddress = '0x4d3967e036f29B26c4C948570aCda564701C04cA';
+const contractAddress = '0xF30e1232689396539971E3F0751ee8561719637B';
 
 
 /*YellowBox.ignoreWarnings(['Warning: The provided value \'moz', 'Warning: The provided value \'ms-stream'])*/
