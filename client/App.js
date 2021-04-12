@@ -13,12 +13,10 @@ import { toTxResult } from "@celo/connect"
 import * as Linking from 'expo-linking'
 import PINE from './contracts/artifacts/PINE.json'
 
-const contractAddress = '0x79040D6785f6806B7bcB14EBeca716E989567c43';
+const contractAddress = '0x4d3967e036f29B26c4C948570aCda564701C04cA';
 
 
-
-
-YellowBox.ignoreWarnings(['Warning: The provided value \'moz', 'Warning: The provided value \'ms-stream'])
+/*YellowBox.ignoreWarnings(['Warning: The provided value \'moz', 'Warning: The provided value \'ms-stream'])*/
 
 export default class App extends React.Component {
   
@@ -30,11 +28,11 @@ export default class App extends React.Component {
     contractName: '',
     celoAmount: '',
     duration: '',
+    pineBalance: '',
     borrower: false,
+    borrowed: false,
     loggedin: false
   }
-
-
 
   handle_contractName = (text) => {
     this.setState({ contractName: text })
@@ -54,7 +52,7 @@ export default class App extends React.Component {
     const networkId = await web3.eth.net.getId();
     
     // Get the deployed HelloWorld contract info for the appropriate network ID
-    const deployedNetwork = PINE.networks[networkId];
+    //const deployedNetwork = PINE.networks[networkId];
 
     // Create a new contract instance with the HelloWorld contract info
     const instance = new web3.eth.Contract(
@@ -64,6 +62,7 @@ export default class App extends React.Component {
 
     // Save the contract instance
     this.setState({ PINE: instance })
+
   }
 
   login = async () => {
@@ -98,13 +97,20 @@ export default class App extends React.Component {
     
     // Convert from a big number to a string
     let cUSDBalance = cUSDBalanceBig.toString()
-    
+
+    let BalanceOf = await this.state.PINE.methods.balanceOf(dappkitResponse.address).call()
+
+
+
     // Update state
     this.setState({ cUSDBalance, 
                     isLoadingBalance: false,
                     address: dappkitResponse.address, 
                     phoneNumber: dappkitResponse.phoneNumber,
+                    pineBalance: BalanceOf,
                     loggedin: true })
+
+    console.log("done login.....................")
   }
 
   read = async () => {
@@ -152,16 +158,51 @@ export default class App extends React.Component {
     this.setState({textInput: text})
   }
 
-  processSmartContract = () => {
+  processSmartContract = async () => {
+
+    const requestId = 'update_name'
+    const dappName = 'Smart Loan'
+    const callback = Linking.makeUrl('/my/path')
 
     if(this.state.borrower){
-      <Text>Borrower's Display</Text>
       console.log("Submit button clicked...")
       console.log(this.state.address)
+      console.log("Here, we need the credential checking process.")
       console.log("Mint the token based on ammount borrowed.")
-      console.log("Transfered the token to Borrower's account.")
-      console.log("Display BalanceOf token.")
-      console.log(text)
+
+
+      
+      //buyTokens from who?
+      let txObject = await this.state.PINE.methods.borrowerMint(Number(this.state.celoAmount))
+
+
+      // Send a request to the Celo wallet to send an update transaction to the HelloWorld contract
+      requestTxSig(
+        kit,
+        [
+          {
+            from: this.state.address,
+            to: contractAddress,
+            tx: txObject,
+            feeCurrency: FeeCurrency.cUSD,
+            estimatedGas: 200000
+          }
+        ],
+        { requestId, dappName, callback }
+      )
+      // Get the response from the Celo wallet
+      const dappkitResponse = await waitForSignedTxs(requestId)
+      const receipts = []
+      // Get the transaction result, once it has been included in the Celo blockchain
+      let tx0 = await kit.connection.sendSignedTransaction(dappkitResponse.rawTxs[0])
+      receipts.push(await tx0.waitReceipt())
+
+      let pineBalanceOf = await this.state.PINE.methods.balanceOf(this.state.address).call()
+      this.setState({ 
+        pineBalance: pineBalanceOf,
+        borrowed: true
+       })
+
     } else {
       <Text>Lender's Display</Text>
       console.log("Submit button clicked...")
@@ -169,14 +210,15 @@ export default class App extends React.Component {
       console.log("Call the buyToken function in contract.")
       console.log("Transfered celo to Borrower's account.")
       console.log("Display BalanceOf token received by lender.")
+
       console.log(text)
     }
   }
 
   loginBorrow = () => {
     this.login()
+    this.setState({borrower: true})
     console.log("Login as borrower...")
-    this.setState({ borrower: true })
   }
 
   loginInvest = () => {
@@ -185,7 +227,7 @@ export default class App extends React.Component {
   }
   
   render(){
-
+    
     
 
     return (
@@ -201,7 +243,7 @@ export default class App extends React.Component {
         <Text>{this.state.address}</Text>
 
         {
-          this.state.loggedin ? 
+          (this.state.loggedin&&(!this.state.borrowed)) ? 
           <Text></Text> : 
           <View>
             <TouchableOpacity onPress={()=> this.loginBorrow()} style={styles.loginbutton}>
@@ -245,7 +287,7 @@ export default class App extends React.Component {
           </View>
           : <Text></Text>
         }
-
+        
 
         {
           this.state.loggedin ? 
@@ -259,9 +301,14 @@ export default class App extends React.Component {
           </View> : 
           <Text></Text>
         }
+        <Text></Text>
+        <Text>
+          PINE Balance: {this.state.pineBalance}
+        </Text>
       </View>
     );
   }
+  
 }
 
 const styles = StyleSheet.create({
