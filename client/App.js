@@ -13,6 +13,7 @@ import { toTxResult } from "@celo/connect"
 import * as Linking from 'expo-linking'
 import PINE from './contracts/artifacts/PINE.json'
 
+
 const contractAddress = '0x4d3967e036f29B26c4C948570aCda564701C04cA';
 
 
@@ -100,7 +101,7 @@ export default class App extends React.Component {
 
     let BalanceOf = await this.state.PINE.methods.balanceOf(dappkitResponse.address).call()
 
-
+    let BorrowerCheck = await this.state.PINE.methods.checkBorrower().call({from: dappkitResponse.address})
 
     // Update state
     this.setState({ cUSDBalance, 
@@ -108,9 +109,11 @@ export default class App extends React.Component {
                     address: dappkitResponse.address, 
                     phoneNumber: dappkitResponse.phoneNumber,
                     pineBalance: BalanceOf,
+                    borrowed: BorrowerCheck,
                     loggedin: true })
 
     console.log("done login.....................")
+    console.log(BorrowerCheck)
   }
 
   read = async () => {
@@ -163,6 +166,14 @@ export default class App extends React.Component {
     const requestId = 'update_name'
     const dappName = 'Smart Loan'
     const callback = Linking.makeUrl('/my/path')
+
+    if(this.state.borrowed){
+      //go back previous
+      this.setState({ 
+        loggedin: false
+       })
+       return;
+    }
 
     if(this.state.borrower){
       console.log("Submit button clicked...")
@@ -228,8 +239,6 @@ export default class App extends React.Component {
   
   render(){
     
-    
-
     return (
       <View style={styles.container}>
         
@@ -243,7 +252,7 @@ export default class App extends React.Component {
         <Text>{this.state.address}</Text>
 
         {
-          (this.state.loggedin&&(!this.state.borrowed)) ? 
+          this.state.loggedin ? 
           <Text></Text> : 
           <View>
             <TouchableOpacity onPress={()=> this.loginBorrow()} style={styles.loginbutton}>
@@ -255,7 +264,7 @@ export default class App extends React.Component {
             </TouchableOpacity>
           </View>
         }
-
+        
         {
           this.state.loggedin ? 
           <View>
@@ -283,7 +292,6 @@ export default class App extends React.Component {
                   onChangeText={this.handle_contractName}
                 />
             }
-
           </View>
           : <Text></Text>
         }
