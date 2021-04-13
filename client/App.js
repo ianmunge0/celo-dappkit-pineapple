@@ -1,7 +1,7 @@
 import React, {useState} from 'react'
 import './global'
 import { web3, kit } from './root'
-import { Image, StyleSheet, Text, TextInput, Button, View, YellowBox, TouchableOpacity } from 'react-native'
+import { Image, StyleSheet, Text, TextInput, Button, View, YellowBox, TouchableOpacity, Alert } from 'react-native'
 import {   
   requestTxSig,
   waitForSignedTxs,
@@ -13,9 +13,8 @@ import { toTxResult } from "@celo/connect"
 import * as Linking from 'expo-linking'
 import PINE from './contracts/artifacts/PINE.json'
 
-
-const contractAddress = '0xF30e1232689396539971E3F0751ee8561719637B';
-
+const contractAddress = '0x955cEfc79a729BAeecB6310D98256D7854971DA7';
+const contractWallet = web3.eth.accounts.privateKeyToAccount('0xfb57bcdd899348168560dfc013b81ae6344bb81263b4bb056369417d4a0aff6a');
 
 /*YellowBox.ignoreWarnings(['Warning: The provided value \'moz', 'Warning: The provided value \'ms-stream'])*/
 
@@ -27,6 +26,7 @@ export default class App extends React.Component {
     address: 'Not logged in',
     PINE: {},
     contractName: '',
+    borrowerAdds: '',
     celoAmount: '',
     duration: '',
     pineBalance: '',
@@ -35,8 +35,8 @@ export default class App extends React.Component {
     loggedin: false
   }
 
-  handle_contractName = (text) => {
-    this.setState({ contractName: text })
+  handle_borrowerAdds = (text) => {
+    this.setState({ borrowerAdds: text })
   }
   handle_celoAmount = (text) => {
     this.setState({ celoAmount: text })
@@ -114,6 +114,7 @@ export default class App extends React.Component {
 
     console.log("done login.....................")
     console.log(BorrowerCheck)
+    
   }
 
   read = async () => {
@@ -125,23 +126,45 @@ export default class App extends React.Component {
     this.setState({ contractName: name })
   }
 
-  write = async () => {
-    const requestId = 'update_name'
+  investPINE = async () => {
+    const requestId = 'buyToken'
     const dappName = 'Smart Loan'
     const callback = Linking.makeUrl('/my/path')
+    const celoAmountWei = kit.web3.utils.toWei(this.state.celoAmount, 'ether')
 
-    // Create a transaction object to update the contract with the 'textInput'
-    const txObject = await this.state.PINE.methods.setName(this.state.loanAmount)
+    console.log('...debug...')
+    console.log(this.state.celoAmount)
+    console.log(this.state.pineBalance)
+    console.log('borrowerAdds: ')
+    console.log(this.state.borrowerAdds)
+    console.log('contractWallet: ')
+    console.log(contractWallet.address)
 
-    // Send a request to the Celo wallet to send an update transaction to the HelloWorld contract
+
+
+    //Need to have approval of Owner:contractWallet Spender:account.address
+    let txOApprove = await instance.methods.approve(this.state.address,celoAmountWei)
+
+    const txObuyTokens = await this.state.PINE.methods.buyTokens(this.state.borrowerAdds)
+    console.log('...debug...5')
+
+    // Send a request to the Celo wallet to send an update transaction to the contract
     requestTxSig(
       kit,
       [
         {
+          from: contractWallet.address,
+          tx: txObuyTokens,
+          feeCurrency: FeeCurrency.cUSD,
+          estimatedGas: 200000
+        },
+        {
           from: this.state.address,
-          to: this.state.PINE.options.address,
-          tx: txObject,
-          feeCurrency: FeeCurrency.cUSD
+          to: contractWallet.address,
+          tx: txObuyTokens,
+          value: Number(celoAmountWei),
+          feeCurrency: FeeCurrency.cUSD,
+          estimatedGas: 200000
         }
       ],
       { requestId, dappName, callback }
@@ -149,13 +172,22 @@ export default class App extends React.Component {
 
     // Get the response from the Celo wallet
     const dappkitResponse = await waitForSignedTxs(requestId)
-    const tx = dappkitResponse.rawTxs[0]
-    
+    const receipts = []
     // Get the transaction result, once it has been included in the Celo blockchain
-    let result = await toTxResult(kit.web3.eth.sendSignedTransaction(tx)).waitReceipt()
+    let tx0 = await kit.connection.sendSignedTransaction(dappkitResponse.rawTxs[0])
+    receipts.push(await tx0.waitReceipt())
+    let tx1 = await kit.connection.sendSignedTransaction(dappkitResponse.rawTxs[0])
+    receipts.push(await tx1.waitReceipt())
+    console.log(receipts)
 
-    console.log(`Hello World contract update transaction receipt: `, result)  
+    let pineBalanceOf = await this.state.PINE.methods.balanceOf(this.state.address).call()
+
+    Alert.alert("Total Balance of PINE: "+pineBalanceOf)
+    this.setState({ 
+      pineBalance: pineBalanceOf
+     })
   }
+  
 
   onChangeText = async (text) => {
     this.setState({textInput: text})
@@ -167,25 +199,14 @@ export default class App extends React.Component {
     const dappName = 'Smart Loan'
     const callback = Linking.makeUrl('/my/path')
 
-    if(this.state.borrowed){
-      //go back previous
-      this.setState({ 
-        loggedin: false
-       })
-       return;
-    }
-
     if(this.state.borrower){
       console.log("Submit button clicked...")
       console.log(this.state.address)
       console.log("Here, we need the credential checking process.")
       console.log("Mint the token based on ammount borrowed.")
 
-
-      
       //buyTokens from who?
       let txObject = await this.state.PINE.methods.borrowerMint(Number(this.state.celoAmount))
-
 
       // Send a request to the Celo wallet to send an update transaction to the HelloWorld contract
       requestTxSig(
@@ -209,20 +230,23 @@ export default class App extends React.Component {
       receipts.push(await tx0.waitReceipt())
 
       let pineBalanceOf = await this.state.PINE.methods.balanceOf(this.state.address).call()
+
+      Alert.alert("Total Borrowed PINE: "+pineBalanceOf)
       this.setState({ 
         pineBalance: pineBalanceOf,
         borrowed: true
        })
-
+       
     } else {
-      <Text>Lender's Display</Text>
+      //Lender's Display
       console.log("Submit button clicked...")
       console.log(this.state.address)
+      await this.investPINE()
+
       console.log("Call the buyToken function in contract.")
       console.log("Transfered celo to Borrower's account.")
       console.log("Display BalanceOf token received by lender.")
 
-      console.log(text)
     }
   }
 
@@ -230,6 +254,14 @@ export default class App extends React.Component {
     this.login()
     this.setState({borrower: true})
     console.log("Login as borrower...")
+    if(this.state.borrowed){
+      //go back previous
+      Alert.alert("You previously initiated a loan. Your PINE balance is: "+this.state.pineBalance)
+      this.setState({ 
+        loggedin: false
+       })
+       return;
+    }
   }
 
   loginInvest = () => {
@@ -289,7 +321,7 @@ export default class App extends React.Component {
                 <TextInput
                   style={{  borderColor: 'gray', borderWidth: 1, backgroundColor: 'white', paddingHorizontal: 60, borderRadius: 5 }}
                   placeholder="Borrower's Contract Adds"
-                  onChangeText={this.handle_contractName}
+                  onChangeText={this.handle_borrowerAdds}
                 />
             }
           </View>
