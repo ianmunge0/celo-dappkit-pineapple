@@ -8,6 +8,7 @@
 - [Expo](https://docs.expo.io/get-started/installation/)
 - [Cocoapods](https://cocoapods.org/)
 - [aries-framework](https://github.com/hyperledger/aries-framework-javascript#installing)
+- [rn-indy-sdk](https://github.com/hyperledger/aries-framework-javascript#installing)
 
 ## Get the boilerplate
 
