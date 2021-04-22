@@ -1,4 +1,4 @@
-# Smart Loan
+# Smart Loan Mobile dApp
 
 ## Requirements
 
