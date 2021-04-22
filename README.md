@@ -6,6 +6,8 @@
 - [Yarn package manager](https://yarnpkg.com/)
 - [Truffle](https://www.trufflesuite.com/truffle)
 - [Expo](https://docs.expo.io/get-started/installation/)
+- [Cocoapods](https://cocoapods.org/)
+- [aries-framework](https://github.com/hyperledger/aries-framework-javascript#installing)
 
 ## Get the boilerplate
 
